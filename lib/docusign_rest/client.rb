@@ -163,12 +163,19 @@ module DocusignRest
     # create an envelope
     def get_template_roles(signers)
       template_roles = []
+      textTabs = []
       signers.each_with_index do |signer, index|
+        if signer[:textTabs]
+          signer[:textTabs].each do |textTab|
+            textTabs << "{\"tabLabel\": \"#{textTab[:tabLabel]}\", \"value\": \"#{textTab[:value]}\"}"
+          end
+        end
         template_roles << "{
           #{check_embedded_signer(signer[:embedded], signer[:email])}
           \"name\"         : \"#{signer[:name]}\",
           \"email\"        : \"#{signer[:email]}\",
-          \"roleName\"     : \"#{signer[:role_name]}\"
+          \"roleName\"     : \"#{signer[:role_name]}\",
+          \"tabs\"         :{ \"textTabs\":[" + textTabs.join(",") + "] }
         }"
       end
       template_roles.join(",")
