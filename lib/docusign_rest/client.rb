@@ -628,7 +628,7 @@ module DocusignRest
       request.body = post_body
       response = http.request(request)
       parsed_response = JSON.parse(response.body)
-
+      puts parsed_response
       #change_request_status(options[:envelope_id])
 
       parsed_response
