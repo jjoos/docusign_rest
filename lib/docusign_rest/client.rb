@@ -611,6 +611,25 @@ module DocusignRest
       parsed_response["url"]
     end
 
+    # add_envelope_recipients
+    # only works if using v2 of API
+    #
+    def add_envelope_recipients(options={})
+      content_type = {'Content-Type' => 'application/json'}
+      content_type.merge(options[:headers]) if options[:headers]
+      include_tabs = options[:include_tabs] || false
+      include_extended = options[:include_extended] || false
+      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{options[:envelope_id]}/recipients?include_tabs=#{include_tabs}&include_extended=#{include_extended}")
+      
+      post_body = options[:recipients].to_json
+
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Post.new(uri.request_uri, headers(content_type))
+      request.body = post_body
+      response = http.request(request)
+      parsed_response = JSON.parse(response.body)
+    end
+
     # Public returns the envelope recipients for a given envelope
     #
     # include_tabs - boolean, determines if the tabs for each signer will be
