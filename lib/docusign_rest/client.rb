@@ -628,6 +628,10 @@ module DocusignRest
       request.body = post_body
       response = http.request(request)
       parsed_response = JSON.parse(response.body)
+
+      change_request_status(envelope_id)
+
+      parsed_response
     end
 
     def get_next_recipient_id(envelope_id)
