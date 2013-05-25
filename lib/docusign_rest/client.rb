@@ -616,17 +616,15 @@ module DocusignRest
     #
     def add_envelope_recipients(options={})
       content_type = {'Content-Type' => 'application/json'}
-      content_type.merge(options[:headers]) if options[:headers]
 
       uri = build_uri("/accounts/#{@acct_id}/envelopes/#{options[:envelope_id]}/recipients")
       
       post_body = "{ \"signers\": #{options[:recipients].to_json} }"
 
       http = initialize_net_http_ssl(uri)
-      request = Net::HTTP::Post.new(uri.request_uri, headers(content_type))
+      request = Net::HTTP::Post.new(uri.request_uri)
       request.body = post_body
       response = http.request(request)
-      puts response
       parsed_response = JSON.parse(response.body)
     end
 
