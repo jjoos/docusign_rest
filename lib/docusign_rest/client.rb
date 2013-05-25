@@ -640,7 +640,6 @@ module DocusignRest
 
     def change_request_status(envelope_id)
       content_type = {'Content-Type' => 'application/json'}
-      content_type.merge(options[:headers]) if options[:headers]
 
       uri = build_uri("/accounts/#{@acct_id}/envelopes/#{envelope_id}/recipients")
       
