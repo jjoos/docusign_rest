@@ -616,10 +616,8 @@ module DocusignRest
     #
     def add_envelope_recipients(options={})
       content_type = {'Content-Type' => 'application/json'}
-      content_type.merge(options[:headers]) if options[:headers]
-      include_tabs = options[:include_tabs] || false
-      include_extended = options[:include_extended] || false
-      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{options[:envelope_id]}/recipients?include_tabs=#{include_tabs}&include_extended=#{include_extended}")
+
+      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{options[:envelope_id]}/recipients")
       
       post_body = { signers: options[:recipients] }.to_json
 
