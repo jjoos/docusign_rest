@@ -649,7 +649,9 @@ module DocusignRest
       request = Net::HTTP::Put.new(uri.request_uri, headers(content_type))
       request.body = post_body
       response = http.request(request)
-      parsed_response = JSON.parse(response.body)
+      puts response.body
+      response.body
+      #parsed_response = JSON.parse(response.body)
     end
 
     # Public returns the envelope recipients for a given envelope
