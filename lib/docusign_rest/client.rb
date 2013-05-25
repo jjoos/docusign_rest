@@ -631,6 +631,10 @@ module DocusignRest
       parsed_response = JSON.parse(response.body)
     end
 
+    def get_next_recipient_id(envelope_id)
+      (get_envelope_recipients( envelope_id: envelope_id )["recipientCount"].to_i + 1).to_s
+    end
+
     # Public returns the envelope recipients for a given envelope
     #
     # include_tabs - boolean, determines if the tabs for each signer will be
