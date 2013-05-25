@@ -641,7 +641,7 @@ module DocusignRest
     def change_request_status(envelope_id)
       content_type = {'Content-Type' => 'application/json'}
 
-      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{envelope_id}/recipients")
+      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{envelope_id}")
       
       post_body = "{ \"status\": \"sent\" }"
       
