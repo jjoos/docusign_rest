@@ -261,7 +261,7 @@ module DocusignRest
               \"conditionalParentValue\": null,
               \"documentId\":\"#{date_signed_tab[:document_id] || '1'}\",
               \"pageNumber\":\"#{date_signed_tab[:page_number] || '1'}\",
-              \"recipientId\":\"#{index+1}\",
+              \"recipientId\":\"#{index+1}\"}
             "
         end
         doc_signer << "
