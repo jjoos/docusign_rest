@@ -469,15 +469,8 @@ module DocusignRest
         \"status\"       : \"#{options[:status]}\"
       }
       "
-      Rails.logger.info "POSTBODY:#{post_body}"
       uri = build_uri("/accounts/#{@acct_id}/envelopes")
-
-      Rails.logger.info "URI:#{uri}"
-      Rails.logger.info "OTHERPARAMS:#{file_params},#{options[:headers]}"
-
       http = initialize_net_http_ssl(uri)
-
-      Rails.logger.info "HTTP:#{http.inspect}"
 
       request = initialize_net_http_multipart_post_request(
                   uri, post_body, file_params, headers(options[:headers])
