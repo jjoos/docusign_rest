@@ -164,12 +164,7 @@ module DocusignRest
     def get_template_roles(signers)
       template_roles = []
       signers.each_with_index do |signer, index|
-        template_roles << "{
-          #{check_embedded_signer(signer[:embedded], signer[:email])}
-          \"name\"         : \"#{signer[:name]}\",
-          \"email\"        : \"#{signer[:email]}\",
-          \"roleName\"     : \"#{signer[:role_name]}\"
-        }"
+        template_roles << "{ #{check_embedded_signer(signer[:embedded], signer[:email])} \"name\"         : \"#{signer[:name]}\", \"email\"        : \"#{signer[:email]}\", \"roleName\"     : \"#{signer[:role_name]}\" }"
       end
       template_roles.join(",")
     end
@@ -248,12 +243,12 @@ module DocusignRest
             \"approveTabs\":null,
             \"checkboxTabs\":null,
             \"companyTabs\":null,
-            \"dateSignedTabs\":null,
+            \"dateSignedTabs\":#{signer[:date_signed_tabs].to_json},
             \"dateTabs\":null,
             \"declineTabs\":null,
             \"emailTabs\":null,
             \"envelopeIdTabs\":null,
-            \"fullNameTabs\":null,
+            \"fullNameTabs\":#{signer[:full_name_tabs].to_json},
             \"initialHereTabs\":null,
             \"listTabs\":null,
             \"noteTabs\":null,
@@ -292,7 +287,7 @@ module DocusignRest
           doc_signer << "],
             \"signerAttachmentTabs\":null,
             \"ssnTabs\":null,
-            \"textTabs\":null,
+            \"textTabs\":#{signer[:text_tabs].to_json},
             \"titleTabs\":null,
             \"zipTabs\":null
           }
@@ -524,6 +519,7 @@ module DocusignRest
                   uri, post_body, file_params, headers(options[:headers])
                 )
 
+
       # Finally do the Net::HTTP request!
       response = http.request(request)
       parsed_response = JSON.parse(response.body)
@@ -556,20 +552,26 @@ module DocusignRest
       content_type = {'Content-Type' => 'application/json'}
       content_type.merge(options[:headers]) if options[:headers]
 
-      post_body = "{
-        \"status\"        : \"#{options[:status]}\",
-        \"emailBlurb\"    : \"#{options[:email][:body]}\",
-        \"emailSubject\"  : \"#{options[:email][:subject]}\",
-        \"templateId\"    : \"#{options[:template_id]}\",
-        \"templateRoles\" : [#{get_template_roles(options[:signers])}],
-       }"
+      emailBlurb = options[:email][:body] if options[:email]
+      emailSubject = options[:email][:subject] if options[:email]
+      #TODO: not handle multiple hash in the get_template_roles
+      roles = JSON.parse(get_template_roles(options[:signers]))
+      post_body = {
+        emailBlurb: emailBlurb,
+        emailSubject: emailSubject,
+        status: options[:status],
+        templateId: options[:template_id],
+        templateRoles: [roles],
+        customFields: options[:customFields]
+      }
 
       uri = build_uri("/accounts/#{@acct_id}/envelopes")
 
       http = initialize_net_http_ssl(uri)
 
       request = Net::HTTP::Post.new(uri.request_uri, headers(content_type))
-      request.body = post_body
+      request.body = post_body.to_json
+
 
       response = http.request(request)
       parsed_response = JSON.parse(response.body)
