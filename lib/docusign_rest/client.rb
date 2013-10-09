@@ -561,8 +561,7 @@ module DocusignRest
         emailSubject: emailSubject,
         status: options[:status],
         templateId: options[:template_id],
-        templateRoles: [roles],
-        customFields: options[:customFields]
+        templateRoles: [roles]
       }
 
       uri = build_uri("/accounts/#{@acct_id}/envelopes")
