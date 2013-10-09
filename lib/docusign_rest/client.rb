@@ -164,7 +164,7 @@ module DocusignRest
     def get_template_roles(signers)
       template_roles = []
       signers.each_with_index do |signer, index|
-        template_roles << "{ #{check_embedded_signer(signer[:embedded], signer[:email])} \"name\"         : \"#{signer[:name]}\", \"email\"        : \"#{signer[:email]}\", \"roleName\"     : \"#{signer[:role_name]}\" }"
+        template_roles << "{ #{check_embedded_signer(signer[:embedded], signer[:email])} \"name\"         : \"#{signer[:name]}\", \"email\"        : \"#{signer[:email]}\", \"roleName\"     : \"#{signer[:role_name]}\", \"tabs\": #{signer[:tabs].to_json} }"
       end
       template_roles.join(",")
     end
