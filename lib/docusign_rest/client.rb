@@ -651,7 +651,50 @@ module DocusignRest
 
       response = http.request(request)
       parsed_response = JSON.parse(response.body)
+      puts parsed_response
       parsed_response["url"]
+    end
+
+    # add_envelope_recipients
+    # only works if using v2 of API
+    #
+    def add_envelope_recipients(options={})
+      content_type = {'Content-Type' => 'application/json'}
+      content_type.merge(options[:headers]) if options[:headers]
+
+      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{options[:envelope_id]}/recipients")
+      
+      post_body = "{ \"signers\": #{options[:recipients].to_json} }"
+
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Post.new(uri.request_uri, headers(content_type))
+      request.body = post_body
+      response = http.request(request)
+      parsed_response = JSON.parse(response.body)
+      puts parsed_response
+      #change_request_status(options[:envelope_id])
+
+      parsed_response
+    end
+
+    def get_next_recipient_id(envelope_id)
+      (get_envelope_recipients( envelope_id: envelope_id )["recipientCount"].to_i + 1).to_s
+    end
+
+    def change_request_status(envelope_id)
+      content_type = {'Content-Type' => 'application/json'}
+
+      uri = build_uri("/accounts/#{@acct_id}/envelopes/#{envelope_id}")
+      
+      post_body = "{ \"status\": \"sent\" }"
+      
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Put.new(uri.request_uri, headers(content_type))
+      request.body = post_body
+      response = http.request(request)
+      puts response.body
+      response.body
+      #parsed_response = JSON.parse(response.body)
     end
 
     # Public returns the envelope recipients for a given envelope
