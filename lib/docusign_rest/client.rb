@@ -187,16 +187,12 @@ module DocusignRest
           :name => signer[:name],
           :email => signer[:email],
           :roleName => signer[:role_name],
+          :emailNotification => signer[:email_notification].nil? ? {} : signer[:email_notification],
           :tabs => {
             :textTabs => get_signer_tabs(signer[:text_tabs]),
             :checkboxTabs => get_signer_tabs(signer[:checkbox_tabs])
           }
         }
-
-        if signer[:email_notification].present?
-          template_role[:emailNotification] = signer[:email_notification]
-        end
-
         template_role['clientUserId'] = (signer[:client_id] || signer[:email]).to_s if signer[:embedded] == true 
         template_roles << template_role
       end
@@ -273,6 +269,7 @@ module DocusignRest
           :accessCode => "",
           :addAccessCodeToEmail =>  false,
           :customFields => nil,
+          :emailNotification => signer[:email_notification].nil? ? {} : signer[:email_notification],
           :iDCheckConfigurationName => nil,
           :iDCheckInformationInput => nil,
           :inheritEmailNotificationConfiguration => false,
@@ -285,10 +282,6 @@ module DocusignRest
           :routingOrder => index+1,
           :socialAuthentications => nil
         }
-
-        if signer[:email_notification].present?
-          doc_signer[:emailNotification] = signer[:email_notification]
-        end
 
         if signer[:embedded]
           doc_signer[:clientUserId] = signer[:client_id] || signer[:email]
@@ -328,7 +321,7 @@ module DocusignRest
         # append the fully build string to the array
         doc_signers << doc_signer
       end
-      doc_signers.to_json
+      doc_signers
     end
 
     def get_tabs(tabs, options, index)
@@ -433,12 +426,12 @@ module DocusignRest
     def get_documents(ios)
       documents = []
       ios.each_with_index do |io, index|
-        documents << "{
-          \"documentId\" : \"#{index+1}\",
-          \"name\"       : \"#{io.original_filename}\"
-        }"
+        documents << {
+          :documentId => index+1,
+          :name => io.original_filename
+        }
       end
-      documents.join(",")
+      documents
     end
 
 
@@ -505,16 +498,17 @@ module DocusignRest
       ios = create_file_ios(options[:files])
       file_params = create_file_params(ios)
 
-      post_body = "{
-        \"emailBlurb\"   : \"#{options[:email][:body] if options[:email]}\",
-        \"emailSubject\" : \"#{options[:email][:subject] if options[:email]}\",
-        \"documents\"    : [#{get_documents(ios)}],
-        \"recipients\"   : {
-          \"signers\" : #{get_signers(options[:signers])}
+      post_body = {
+        :documents => get_documents(ios),
+        :recipients => {
+          :signers => get_signers(options[:signers])
         },
-        \"status\"       : \"#{options[:status]}\"
+        :status => options[:status]
       }
-      "
+
+      post_body[:emailBlurb] = options[:email][:body] if options[:email]
+      post_body[:emailSubject] = options[:email][:subject] if options[:email]
+      post_body = post_body.to_json
 
       uri = build_uri("/accounts/#{@acct_id}/envelopes")
 
@@ -562,22 +556,26 @@ module DocusignRest
       ios = create_file_ios(options[:files])
       file_params = create_file_params(ios)
 
-      post_body = "{
-        \"emailBlurb\"   : \"#{options[:email][:body] if options[:email]}\",
-        \"emailSubject\" : \"#{options[:email][:subject] if options[:email]}\",
-        \"documents\"    : [#{get_documents(ios)}],
-        \"recipients\"   : {
-          \"signers\"    : #{get_signers(options[:signers], template: true)}
+      post_body = {
+        :documents => get_documents(ios),
+        :recipients => {
+          :signers => get_signers(options[:signers], template: true)
         },
-        \"envelopeTemplateDefinition\" : {
-          \"description\" : \"#{options[:description]}\",
-          \"name\"        : \"#{options[:name]}\",
-          \"pageCount\"   : 1,
-          \"password\"    : \"\",
-          \"shared\"      : false
+        :envelopeTemplateDefinition => {
+          :description => options[:description],
+          :name => options[:name],
+          :pageCount =>  1,
+          :password => '',
+          :shared => false
         }
+
       }
-      "
+
+      post_body[:emailBlurb] = options[:email][:body] if options[:email]
+      post_body[:emailSubject] = options[:email][:subject] if options[:email]
+
+      post_body = post_body.to_json
+
 
       uri = build_uri("/accounts/#{@acct_id}/templates")
 
