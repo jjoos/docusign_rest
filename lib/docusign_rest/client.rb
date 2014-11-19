@@ -103,7 +103,7 @@ module DocusignRest
       uri = build_uri("/oauth2/token")
 
       request = Net::HTTP::Post.new(uri.request_uri, content_type)
-      request.body = "grant_type=password&client_id=#{integrator_key}&username=#{email}&password=#{password}&scope=api"
+      request.body = "grant_type=password&client_id=#{CGI.escape(integrator_key)}&username=#{CGI.escape(email)}&password=#{CGI.escape(password)}&scope=api"
 
       http = initialize_net_http_ssl(uri)
       response = http.request(request)
@@ -193,7 +193,7 @@ module DocusignRest
             :checkboxTabs => get_signer_tabs(signer[:checkbox_tabs])
           }
         }
-        template_role['clientUserId'] = (signer[:client_id] || signer[:email]).to_s if signer[:embedded] == true 
+        template_role['clientUserId'] = (signer[:client_id] || signer[:email]).to_s if signer[:embedded] == true
         template_roles << template_role
       end
       template_roles
@@ -776,7 +776,7 @@ module DocusignRest
         else
           value
        end
-    end    
+    end
   end
 
 end
